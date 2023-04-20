@@ -7,12 +7,11 @@
 
 import Foundation
 
-class Album: BaseModel {
+class Album: NSObject, NSCoding {
     
     var photos: [Photo]?
     
-    override init(fromJson: [String : Any]) {
-        super.init(fromJson: fromJson)
+    init(fromJson: [String : Any]) {
         
         let array = fromJson["root_array"] as? [[String: AnyObject]]
         if let array {
@@ -21,6 +20,14 @@ class Album: BaseModel {
                 self.photos?.append(Photo(fromJson: element))
             }
         }
+    }
+    
+    func encode(with coder: NSCoder) {
+        coder.encode(photos, forKey: "root_array")
+    }
+    
+    required init(coder aDecoder: NSCoder) {
+        self.photos = aDecoder.decodeObject(forKey: "root_array") as? [Photo]
     }
     
 }

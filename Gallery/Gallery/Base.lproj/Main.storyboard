@@ -12,10 +12,11 @@
         <!--Navigation Controller-->
         <scene sceneID="dao-7u-W0n">
             <objects>
-                <navigationController storyboardIdentifier="NavigationController" id="fZ5-EA-Vb8" sceneMemberID="viewController">
+                <navigationController id="fZ5-EA-Vb8" sceneMemberID="viewController">
                     <navigationBar key="navigationBar" contentMode="scaleToFill" id="onH-E6-xTh">
                         <rect key="frame" x="0.0" y="0.0" width="414" height="44"/>
                         <autoresizingMask key="autoresizingMask"/>
+                        <navigationBarAppearance key="standardAppearance"/>
                     </navigationBar>
                     <connections>
                         <segue destination="LXO-Fj-hD0" kind="relationship" relationship="rootViewController" id="oDW-Pu-syH"/>

@@ -7,7 +7,7 @@
 
 import UIKit
 
-class GalleryCollectionViewCell: UICollectionViewCell, GalleryCollectionCellViewModelDelegate {
+class GalleryCollectionViewCell: UICollectionViewCell {
 
     @IBOutlet weak var thumbnailImg: UIImageView!
     
@@ -17,18 +17,9 @@ class GalleryCollectionViewCell: UICollectionViewCell, GalleryCollectionCellView
         super.awakeFromNib()
     }
     
-    func set(model: GalleryCollectionCellViewModel?) {
+    func set(model: GalleryCollectionCellViewModel?, photo: Photo) {
         galleryCollectionCellViewModel = model
-        model?.delegate = self
-    }
-    
-    func didReceiveImageData(photo: Photo, laterUpdate: Bool) {
-        DispatchQueue.main.async { [weak self] in
-            self?.thumbnailImg.image = photo.thumbnail
-            if laterUpdate {
-                NotificationCenter.default.post(name: .updateGalleryCollectionCell, object: nil, userInfo: nil)
-            }
-        }
+        self.thumbnailImg.image = photo.thumbnail ?? UIImage(named: "placeholder-image")
     }
         
     override func prepareForReuse() {

@@ -11,6 +11,7 @@ protocol BaseAPIProtocol {
     var baseURL: String { get }
     func getPhotos(onAlbum: @escaping (NetworkService.Handler))
     func getAlbum(albumId: Int, onAlbum: @escaping (NetworkService.Handler))
+    func download(from: URL, action: @escaping (NetworkService.Handler))
 }
 
 extension NetworkService: BaseAPIProtocol {

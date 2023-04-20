@@ -75,7 +75,7 @@ extension GalleryCollectionView: UICollectionViewDelegate, UICollectionViewDataS
             return UICollectionViewCell()
         }
         if let photo = galleryCollectionViewModel?.album?.photos?[indexPath.row] {
-            cell.set(model: galleryCollectionCellViewModel)
+            cell.set(model: galleryCollectionCellViewModel, photo: photo)
             cell.galleryCollectionCellViewModel?.set(photo: photo)
         }
         return cell

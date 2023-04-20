@@ -20,6 +20,7 @@ enum NetworkError: Error {
     case apiError
     case unknown
     case taskAlreadyExists
+    case noInternetConnection
 }
 
 struct TaskInfo {
@@ -41,8 +42,7 @@ class NetworkService: NetworkServiceProtocol {
     static let shared: NetworkService = NetworkService()
     final let TIMEOUT_INTERVAL_FOR_REQUEST: TimeInterval = 30
     final let TIMEOUT_INTERVAL_FOR_RESOURCE: TimeInterval = 300
-    
-    let operationQueue = OperationQueue()
+    final let MAXIMUM_NUMBER_TASKS: Int = 1
     
     // MARK: - Variables
     
@@ -50,7 +50,6 @@ class NetworkService: NetworkServiceProtocol {
     var session: URLSession?
     
     init() {
-        operationQueue.maxConcurrentOperationCount = 10
     }
     
     func getSession() -> URLSession {
@@ -81,17 +80,19 @@ class NetworkService: NetworkServiceProtocol {
         }
     
         let task = session.dataTask(with: request) { (data, response, error) in
+            self.removeTask(for: url)
             if let httpResponse = response as? HTTPURLResponse {
                 if let data = data {
-                    self.removeTask(for: url)
                     action(error, httpResponse.statusCode, data)
                 } else {
-                    self.removeTask(for: url)
                     action(error, httpResponse.statusCode, nil)
                 }
             } else {
-                self.removeTask(for: url)
-                action(NetworkError.invalidResponse, nil, nil)
+                if let nsError = error as NSError?, nsError.domain == NSURLErrorDomain && nsError.code == NSURLErrorNotConnectedToInternet {
+                    action(NetworkError.noInternetConnection, nil, nil)
+                } else {
+                    action(NetworkError.invalidResponse, nil, nil)
+                }
             }
         }
         
@@ -108,29 +109,34 @@ class NetworkService: NetworkServiceProtocol {
             return
         }
         
-//        let operation = BlockOperation {
-            let session = self.getSession()
-            let task = session.dataTask(with: url) { (data, response, error) in
-                self.removeTask(for: url)
-                if let httpResponse = response as? HTTPURLResponse {
-                    if let jsonData = data {
-                        action(error, httpResponse.statusCode, jsonData)
-                    } else {
-                        action(error, httpResponse.statusCode, nil)
-                    }
+        let session = self.getSession()
+        let task = session.dataTask(with: url) { (data, response, error) in
+            self.removeTask(for: url)
+            if let httpResponse = response as? HTTPURLResponse {
+                if let jsonData = data {
+                    action(error, httpResponse.statusCode, jsonData)
+                } else {
+                    action(error, httpResponse.statusCode, nil)
+                }
+            } else {
+                if let nsError = error as NSError?, nsError.domain == NSURLErrorDomain && nsError.code == NSURLErrorNotConnectedToInternet {
+                    action(NetworkError.noInternetConnection, nil, nil)
                 } else {
                     action(NetworkError.invalidResponse, nil, nil)
                 }
             }
-            
-            let taskInfo = TaskInfo(task: task, url: url)
-            self.tasks.append(taskInfo)
-            task.resume()
-//        }
-//        operationQueue.addOperation(operation)
-//        operationQueue.addBarrierBlock {
-//            Thread.sleep(forTimeInterval: 0.25)
-//        }
+        }
+        
+        if tasks.count > MAXIMUM_NUMBER_TASKS {
+            Log.d("Maximum number of tasks reached.")
+            return
+        }
+        
+        let taskInfo = TaskInfo(task: task, url: url)
+        self.tasks.append(taskInfo)
+        
+        task.resume()
+
     }
     
     func containsTask(for url: URL) -> Bool {

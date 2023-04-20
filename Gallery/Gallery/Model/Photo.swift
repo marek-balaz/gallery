@@ -8,7 +8,7 @@
 import Foundation
 import UIKit
 
-class Photo: BaseModel {
+class Photo: NSObject, NSCoding {
     
     var albumId: Int?
     var id: Int?
@@ -18,9 +18,8 @@ class Photo: BaseModel {
     var thumbnail: UIImage?
     var image: UIImage?
     
-    override init(fromJson: [String: Any]) {
-        super.init(fromJson: fromJson)
-        
+    init(fromJson: [String: Any]) {
+    
         albumId = fromJson["albumId"] as? Int
         id = fromJson["id"] as? Int
         title = fromJson["title"] as? String
@@ -41,4 +40,19 @@ class Photo: BaseModel {
         return dic
     }
     
+    func encode(with coder: NSCoder) {
+        coder.encode(albumId, forKey: "albumId")
+        coder.encode(id, forKey: "id")
+        coder.encode(title, forKey: "title")
+        coder.encode(url, forKey: "url")
+        coder.encode(thumbnailUrl, forKey: "thumbnailUrl")
+    }
+    
+    required init(coder aDecoder: NSCoder) {
+        self.albumId = aDecoder.decodeObject(forKey: "albumId") as? Int
+        self.id = aDecoder.decodeObject(forKey: "id") as? Int
+        self.title = aDecoder.decodeObject(forKey: "title") as? String
+        self.url = aDecoder.decodeObject(forKey: "url") as? String
+        self.thumbnailUrl = aDecoder.decodeObject(forKey: "thumbnailUrl") as? String
+    }
 }

@@ -8,7 +8,7 @@
 import Foundation
 
 protocol GalleryCollectionCellViewModelDelegate: AnyObject {
-    func didReceiveImageData(photo: Photo, laterUpdate: Bool)
+    func didReceiveImageData()
 }
 
 class GalleryCollectionCellViewModel: GalleryViewModel {
@@ -39,10 +39,10 @@ class GalleryCollectionCellViewModel: GalleryViewModel {
         let folderName: String = "album_\(albumId)"
         
         if photo.thumbnail != nil {
-            delegate?.didReceiveImageData(photo: photo, laterUpdate: false)
+            delegate?.didReceiveImageData()
         } else if LocalFileService.shared.containsImage(imageName: photoName, folderName: folderName) {
             photo.thumbnail = LocalFileService.shared.getImage(imageName: photoName, folderName: folderName)
-            delegate?.didReceiveImageData(photo: photo, laterUpdate: false)
+            delegate?.didReceiveImageData()
         } else {
             
             guard let url = URL(string: thumbnailUrl) else {
@@ -50,7 +50,7 @@ class GalleryCollectionCellViewModel: GalleryViewModel {
                 return
             }
            
-            NetworkService.shared.download(from: url) { error, statusCode, data in
+            networkService.download(from: url) { error, statusCode, data in
                 if statusCode == 200 {
                     
                     if let data, let image = LocalFileService.shared.dataToImage(for: data) {
@@ -60,12 +60,20 @@ class GalleryCollectionCellViewModel: GalleryViewModel {
                         Log.d("No image data.")
                     }
                     
-                    self.delegate?.didReceiveImageData(photo: photo, laterUpdate: true)
+                    self.delegate?.didReceiveImageData()
                     
                 } else if (400..<500).contains(statusCode ?? -1) {
-                    Log.d(NetworkError.invalidResponse)
+                    if let error {
+                        Log.d(error)
+                    } else {
+                        Log.d(NetworkError.unknown)
+                    }
                 } else {
-                    Log.d(NetworkError.apiError)
+                    if let error {
+                        Log.d(error)
+                    } else {
+                        Log.d(NetworkError.unknown)
+                    }
                 }
             }
             

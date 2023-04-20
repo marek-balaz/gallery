@@ -15,7 +15,12 @@ protocol PhotoDetailViewModelDelegate: AnyObject {
 
 class PhotoDetailViewModel: GalleryViewModel {
     
+    private let networkService: NetworkServiceProtocol
     weak var delegate: PhotoDetailViewModelDelegate?
+    
+    init(networkService: NetworkServiceProtocol = NetworkService()) {
+        self.networkService = networkService
+    }
     
     func set(photo: Photo) {
         

@@ -15,11 +15,13 @@ protocol GalleryCollectionViewModelDelegate: AnyObject {
 class GalleryCollectionViewModel: GalleryViewModel {
     
     private let networkService: BaseAPIProtocol
+    private let cacheService: AlbumCacheServiceProtocol
     weak var delegate: GalleryCollectionViewModelDelegate?
     var album: Album?
         
-    init(networkService: BaseAPIProtocol = NetworkService()) {
+    init(networkService: BaseAPIProtocol = NetworkService(), cacheService: AlbumCacheService = AlbumCacheService()) {
         self.networkService = networkService
+        self.cacheService = cacheService
     }
     
     func getPhotos() {
@@ -29,6 +31,8 @@ class GalleryCollectionViewModel: GalleryViewModel {
                 if let json = data?.parseJSON() {
                     let album = Album(fromJson: json)
                     self.album = album
+                    self.cacheService.saveAlbum(album)
+                    self.fetchLocalImages(for: album)
                     self.delegate?.didReceiveAlbumData()
                 } else {
                     Log.d("Request response data is empty.")
@@ -40,6 +44,9 @@ class GalleryCollectionViewModel: GalleryViewModel {
                 Log.d(NetworkError.invalidResponse)
             } else {
                 Log.d(NetworkError.apiError)
+                self.album = self.cacheService.loadAlbum()
+                self.fetchLocalImages(for: self.album)
+                self.delegate?.didReceiveAlbumData()
             }
         }
     }
@@ -52,6 +59,7 @@ class GalleryCollectionViewModel: GalleryViewModel {
                     debugPrint(json)
                     let album = Album(fromJson: json)
                     self.album = album
+                    self.fetchLocalImages(for: album)
                     self.delegate?.didReceiveAlbumData()
                 } else {
                     Log.d("Request response data is empty.")
@@ -67,7 +75,7 @@ class GalleryCollectionViewModel: GalleryViewModel {
         }
     }
     
-    func loadImageForPhoto() {
+    func fetchLocalImages(for album: Album?) {
         
         guard let album = album else {
             Log.d("Album doesn't exists.")
@@ -79,14 +87,35 @@ class GalleryCollectionViewModel: GalleryViewModel {
             return
         }
         
-        
+        for photo in photos {
+            
+            guard let thumbnailUrl = photo.thumbnailUrl else {
+                Log.d("Thumbnail URL doesn't exist.")
+                return
+            }
+            
+            guard let photoName = getName(for: thumbnailUrl) else {
+                return
+            }
+            
+            guard let albumId = photo.albumId else {
+                Log.d("AlbumId is nil")
+                return
+            }
+            
+            let folderName: String = "album_\(albumId)"
+            
+            if LocalFileService.shared.containsImage(imageName: photoName, folderName: folderName) {
+                photo.thumbnail = LocalFileService.shared.getImage(imageName: photoName, folderName: folderName)
+            }
+            
+        }
         
     }
     
     func numberOfPhotos() -> Int {
         
         guard let album = album else {
-            Log.d("Album doesn't exists.")
             return 0
         }
         

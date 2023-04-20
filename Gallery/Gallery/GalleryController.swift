@@ -7,7 +7,7 @@
 
 import UIKit
 
-class GalleryController: UIViewController, GalleryCollectionViewModelDelegate {
+class GalleryController: UIViewController, GalleryCollectionViewModelDelegate, GalleryCollectionCellViewModelDelegate {
     
     // MARK: - Outlets
     
@@ -19,20 +19,13 @@ class GalleryController: UIViewController, GalleryCollectionViewModelDelegate {
     
     // MARK: - Actions
     
-    @objc func updateGalleryCollectionCellImage(_ notification: NSNotification) {
-        if let dict = notification.userInfo as NSDictionary? {
-            if let indexPath = dict["index"] as? IndexPath {
-                Log.d(indexPath)
-                
-                updateTimer?.invalidate()
-                
-                updateTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
-                    self?.galleryCollectionView.collectionGallery.reloadData()
-                }
-                
-            }
+    @objc func updateGalleryCollectionCellImage() {
+        updateTimer?.invalidate()
+        
+        updateTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
+            self?.galleryCollectionView.collectionGallery.reloadData()
         }
-     }
+    }
     
     // MARK: - Overrides
     
@@ -42,12 +35,13 @@ class GalleryController: UIViewController, GalleryCollectionViewModelDelegate {
         self.navigationItem.title = "Gallery"
         
         galleryCollectionView.galleryCollectionCellViewModel = GalleryCollectionCellViewModel()
+        galleryCollectionView.galleryCollectionCellViewModel?.delegate = self
         
         galleryCollectionView.galleryCollectionViewModel = GalleryCollectionViewModel()
         galleryCollectionView.galleryCollectionViewModel?.delegate = self
-        galleryCollectionView.galleryCollectionViewModel?.getPhotos() // getAlbum(for: 1)
         
-        NotificationCenter.default.addObserver(self, selector: #selector(updateGalleryCollectionCellImage), name: .updateGalleryCollectionCell, object: nil)
+        galleryCollectionView.galleryCollectionViewModel?.getPhotos() // getAlbum(for: 1)
+       
     }
     
     override func viewDidDisappear(_ animated: Bool) {
@@ -59,6 +53,16 @@ class GalleryController: UIViewController, GalleryCollectionViewModelDelegate {
     func didReceiveAlbumData() {
         DispatchQueue.main.async { [weak self] in
             self?.galleryCollectionView.collectionGallery.reloadData()
+        }
+    }
+    
+    func didReceiveImageData() {
+        DispatchQueue.main.async { [weak self] in
+            self?.updateTimer?.invalidate()
+            
+            self?.updateTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
+                self?.galleryCollectionView.collectionGallery.reloadData()
+            }
         }
     }
     
