@@ -76,7 +76,7 @@ extension GalleryCollectionView: UICollectionViewDelegate, UICollectionViewDataS
         }
         if let photo = galleryCollectionViewModel?.album?.photos?[indexPath.row] {
             cell.set(model: galleryCollectionCellViewModel, photo: photo)
-            cell.galleryCollectionCellViewModel?.set(photo: photo)
+            // cell.galleryCollectionCellViewModel?.set(photo: photo)
         }
         return cell
     }
@@ -86,6 +86,7 @@ extension GalleryCollectionView: UICollectionViewDelegate, UICollectionViewDataS
             let photo = galleryCollectionViewModel?.album?.photos?[indexPath.row] else {
                 return
         }
+        
         galleryCell.galleryCollectionCellViewModel?.set(photo: photo)
     }
     

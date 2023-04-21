@@ -58,11 +58,7 @@ class GalleryController: UIViewController, GalleryCollectionViewModelDelegate, G
     
     func didReceiveImageData() {
         DispatchQueue.main.async { [weak self] in
-            self?.updateTimer?.invalidate()
-            
-            self?.updateTimer = Timer.scheduledTimer(withTimeInterval: 0.5, repeats: false) { [weak self] _ in
-                self?.galleryCollectionView.collectionGallery.reloadData()
-            }
+            self?.galleryCollectionView.collectionGallery.reloadData()
         }
     }
     
