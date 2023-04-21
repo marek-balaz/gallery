@@ -42,6 +42,7 @@ class NetworkService: NetworkServiceProtocol {
     static let shared: NetworkService = NetworkService()
     final let TIMEOUT_INTERVAL_FOR_REQUEST: TimeInterval = 30
     final let TIMEOUT_INTERVAL_FOR_RESOURCE: TimeInterval = 300
+    final let MAXIMUM_NUMBER_TASKS: Int = 3
     
     // MARK: - Variables
     
@@ -103,8 +104,24 @@ class NetworkService: NetworkServiceProtocol {
     
     func download(from url: URL, action: @escaping Handler) {
         
+        if containsTask(for: url) {
+            Log.d("Task for \(url) already exist.")
+            return
+        }
+        
+        if tasks.count > MAXIMUM_NUMBER_TASKS {
+            Log.d("Maximum number of tasks reached.")
+            return
+        }
+        
         let session = self.getSession()
-        let task = session.dataTask(with: url) { (data, response, error) in
+        let task = session.dataTask(with: url) { [weak self] (data, response, error) in
+            guard let self = self else {
+                return
+            }
+            
+            self.removeTask(for: url)
+            
             if let httpResponse = response as? HTTPURLResponse {
                 if let jsonData = data {
                     action(error, httpResponse.statusCode, jsonData)
@@ -119,6 +136,9 @@ class NetworkService: NetworkServiceProtocol {
                 }
             }
         }
+        
+        let taskInfo = TaskInfo(task: task, url: url)
+        tasks.append(taskInfo)
         
         task.resume()
 

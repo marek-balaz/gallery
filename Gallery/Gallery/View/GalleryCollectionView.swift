@@ -76,18 +76,9 @@ extension GalleryCollectionView: UICollectionViewDelegate, UICollectionViewDataS
         }
         if let photo = galleryCollectionViewModel?.album?.photos?[indexPath.row] {
             cell.set(model: galleryCollectionCellViewModel, photo: photo)
-            // cell.galleryCollectionCellViewModel?.set(photo: photo)
+            cell.galleryCollectionCellViewModel?.set(photo: photo)
         }
         return cell
-    }
-    
-    func collectionView(_ collectionView: UICollectionView, willDisplay cell: UICollectionViewCell, forItemAt indexPath: IndexPath) {
-        guard let galleryCell = cell as? GalleryCollectionViewCell,
-            let photo = galleryCollectionViewModel?.album?.photos?[indexPath.row] else {
-                return
-        }
-        
-        galleryCell.galleryCollectionCellViewModel?.set(photo: photo)
     }
     
     func collectionView(_ collectionView: UICollectionView, didSelectItemAt indexPath: IndexPath) {

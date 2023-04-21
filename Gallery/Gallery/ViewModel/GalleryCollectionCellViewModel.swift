@@ -14,7 +14,7 @@ protocol GalleryCollectionCellViewModelDelegate: AnyObject {
 class GalleryCollectionCellViewModel: GalleryViewModel {
     
     private let networkService: BaseAPIProtocol
-    let debouncer = Debouncer(delay: 0.02)
+
     let downloadQueue = DispatchQueue(label: "com.balaz.gallery", qos: .userInitiated, attributes: .concurrent)
     weak var delegate: GalleryCollectionCellViewModelDelegate?
     
@@ -52,37 +52,35 @@ class GalleryCollectionCellViewModel: GalleryViewModel {
                 return
             }
            
-            debouncer.debounce {
-                self.downloadQueue.async {
-                    
-                    self.networkService.download(from: url) { [weak self] error, statusCode, data in
-                        if statusCode == 200 {
-                            
-                            if let data, let image = LocalFileService.shared.dataToImage(for: data) {
-                                photo.thumbnail = image
-                                LocalFileService.shared.saveImage(image: image, imageName: photoName, folderName: folderName)
-                            } else {
-                                Log.d("No image data.")
-                            }
-                            
-                            self?.delegate?.didReceiveImageData()
-                            
-                        } else if (400..<500).contains(statusCode ?? -1) {
-                            if let error {
-                                Log.d(error)
-                            } else {
-                                Log.d(NetworkError.unknown)
-                            }
+            self.downloadQueue.async {
+                
+                self.networkService.download(from: url) { [weak self] error, statusCode, data in
+                    if statusCode == 200 {
+                        
+                        if let data, let image = LocalFileService.shared.dataToImage(for: data) {
+                            photo.thumbnail = image
+                            LocalFileService.shared.saveImage(image: image, imageName: photoName, folderName: folderName)
                         } else {
-                            if let error {
-                                Log.d(error)
-                            } else {
-                                Log.d(NetworkError.unknown)
-                            }
+                            Log.d("No image data.")
+                        }
+                        
+                        self?.delegate?.didReceiveImageData()
+                        
+                    } else if (400..<500).contains(statusCode ?? -1) {
+                        if let error {
+                            Log.d(error)
+                        } else {
+                            Log.d(NetworkError.unknown)
+                        }
+                    } else {
+                        if let error {
+                            Log.d(error)
+                        } else {
+                            Log.d(NetworkError.unknown)
                         }
                     }
-                    
                 }
+                
             }
             
             
