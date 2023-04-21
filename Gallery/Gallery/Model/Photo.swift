@@ -17,6 +17,7 @@ class Photo: NSObject, NSCoding {
     var thumbnailUrl: String?
     var thumbnail: UIImage?
     var image: UIImage?
+    var isLoading: Bool = false
     
     init(fromJson: [String: Any]) {
     

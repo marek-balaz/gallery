@@ -14,12 +14,13 @@ protocol GalleryCollectionCellViewModelDelegate: AnyObject {
 class GalleryCollectionCellViewModel: GalleryViewModel {
     
     private let networkService: BaseAPIProtocol
-
-    let downloadQueue = DispatchQueue(label: "com.balaz.gallery", qos: .userInitiated, attributes: .concurrent)
+    private var downloadQueue: DispatchQueue?
+    
     weak var delegate: GalleryCollectionCellViewModelDelegate?
     
-    init(networkService: BaseAPIProtocol = NetworkService()) {
+    init(networkService: BaseAPIProtocol = NetworkService(), downloadQueue: DispatchQueue) {
         self.networkService = networkService
+        self.downloadQueue = downloadQueue
     }
     
     func set(photo: Photo) {
@@ -52,8 +53,7 @@ class GalleryCollectionCellViewModel: GalleryViewModel {
                 return
             }
            
-            self.downloadQueue.async {
-                
+            self.downloadQueue?.sync {
                 self.networkService.download(from: url) { [weak self] error, statusCode, data in
                     if statusCode == 200 {
                         
@@ -63,7 +63,7 @@ class GalleryCollectionCellViewModel: GalleryViewModel {
                         } else {
                             Log.d("No image data.")
                         }
-                        
+                    
                         self?.delegate?.didReceiveImageData()
                         
                     } else if (400..<500).contains(statusCode ?? -1) {
@@ -83,10 +83,7 @@ class GalleryCollectionCellViewModel: GalleryViewModel {
                 
             }
             
-            
         }
     }
-    
-    
     
 }

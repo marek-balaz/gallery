@@ -34,7 +34,8 @@ class GalleryController: UIViewController, GalleryCollectionViewModelDelegate, G
         
         self.navigationItem.title = "Gallery"
         
-        galleryCollectionView.galleryCollectionCellViewModel = GalleryCollectionCellViewModel()
+        galleryCollectionView.galleryCollectionCellViewModel = GalleryCollectionCellViewModel(downloadQueue: DispatchQueue(label: "com.balaz.gallery", qos: .userInitiated, attributes: .concurrent))
+        
         galleryCollectionView.galleryCollectionCellViewModel?.delegate = self
         
         galleryCollectionView.galleryCollectionViewModel = GalleryCollectionViewModel()

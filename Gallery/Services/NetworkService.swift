@@ -80,7 +80,6 @@ class NetworkService: NetworkServiceProtocol {
         }
     
         let task = session.dataTask(with: request) { (data, response, error) in
-            self.removeTask(for: url)
             if let httpResponse = response as? HTTPURLResponse {
                 if let data = data {
                     action(error, httpResponse.statusCode, data)
@@ -95,9 +94,6 @@ class NetworkService: NetworkServiceProtocol {
                 }
             }
         }
-        
-        let taskInfo = TaskInfo(task: task, url: url)
-        tasks.append(taskInfo)
         
         task.resume()
     }
@@ -120,7 +116,9 @@ class NetworkService: NetworkServiceProtocol {
                 return
             }
             
-            self.removeTask(for: url)
+            DispatchQueue.main.sync {
+                self.removeTask(for: url)
+            }
             
             if let httpResponse = response as? HTTPURLResponse {
                 if let jsonData = data {
