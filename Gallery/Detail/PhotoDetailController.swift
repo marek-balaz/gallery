@@ -42,9 +42,6 @@ class PhotoDetailController: UIViewController, PhotoDetailViewModelDelegate {
             photoDetailView.photoImg.image = photo.thumbnail
         }
         
-        photoDetailView.loadingIndicator.startAnimating()
-        photoDetailView.loadingIndicator.isHidden = true
-        
         photoDetailView.closeBtn.addTarget(self, action: #selector(closeBtnAction(_:)), for: .touchUpInside)
     }
     

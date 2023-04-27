@@ -7,7 +7,7 @@
 
 import Foundation
 
-protocol BaseAPIProtocol {
+protocol BaseAPIProtocol: NetworkServiceProtocol {
     var baseURL: String { get }
     func getPhotos(onAlbum: @escaping (NetworkService.Handler))
     func getAlbum(albumId: Int, onAlbum: @escaping (NetworkService.Handler))

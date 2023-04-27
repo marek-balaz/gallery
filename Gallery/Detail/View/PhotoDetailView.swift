@@ -42,6 +42,9 @@ class PhotoDetailView: UIView {
     private func loadXib() -> UIView? {
         Bundle.main.loadNibNamed(String(describing: type(of: self)), owner: self, options: nil)
         
+        loadingIndicator.startAnimating()
+        loadingIndicator.isHidden = true
+        
         return componentContentView
     }
     

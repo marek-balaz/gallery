@@ -19,12 +19,14 @@ class GalleryCollectionViewCell: UICollectionViewCell {
     
     func set(model: GalleryCollectionCellViewModel?, photo: Photo) {
         galleryCollectionCellViewModel = model
+        galleryCollectionCellViewModel?.set(photo: photo)
         self.thumbnailImg.image = photo.thumbnail ?? UIImage(named: "placeholder-image")
     }
         
     override func prepareForReuse() {
         super.prepareForReuse()
-        self.thumbnailImg.image = UIImage(named: "placeholder-image")
+        galleryCollectionCellViewModel = nil
+        thumbnailImg.image = UIImage(named: "placeholder-image")
     }
     
 }

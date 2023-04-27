@@ -17,6 +17,7 @@ class GalleryCollectionView: UIView {
     // MARK: - Constants
     
     internal let INSET: CGFloat = 3
+    internal let NUMBER_OF_COLUMNS: CGFloat = 3
     
     // MARK: - Variables
     
@@ -76,7 +77,6 @@ extension GalleryCollectionView: UICollectionViewDelegate, UICollectionViewDataS
         }
         if let photo = galleryCollectionViewModel?.album?.photos?[indexPath.row] {
             cell.set(model: galleryCollectionCellViewModel, photo: photo)
-            cell.galleryCollectionCellViewModel?.set(photo: photo)
         }
         return cell
     }
@@ -94,7 +94,7 @@ extension GalleryCollectionView: UICollectionViewDelegate, UICollectionViewDataS
             layout.minimumLineSpacing = INSET
         }
 
-        return CGSize(width: (self.bounds.width - 4*INSET) / 3, height: (self.bounds.width - 4*INSET) / 3)
+        return CGSize(width: (self.bounds.width - 4*INSET) / NUMBER_OF_COLUMNS, height: (self.bounds.width - 4*INSET) / NUMBER_OF_COLUMNS)
     }
     
 }

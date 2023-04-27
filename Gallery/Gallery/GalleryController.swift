@@ -45,10 +45,6 @@ class GalleryController: UIViewController, GalleryCollectionViewModelDelegate, G
        
     }
     
-    override func viewDidDisappear(_ animated: Bool) {
-        NotificationCenter.default.removeObserver(self)
-    }
-    
     // MARK: - Delegates
     
     func didReceiveAlbumData() {
